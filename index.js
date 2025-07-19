@@ -13,7 +13,7 @@ app.post('/trigger-login', async (req, res) => {
   const page = await context.newPage();
 
   try {
-    await page.goto('https://www.trustpilot.com/users/login', { waitUntil: 'domcontentloaded' });
+    await page.goto('https://www.trustpilot.com/users/connect?redirect=%2f&source_cta=header', { waitUntil: 'domcontentloaded' });
 
     // Wait for iframe to load
     const frame = await page.frame(({ url }) => url.includes('authentication.trustpilot.com'));
@@ -40,7 +40,7 @@ app.post('/submit-otp', async (req, res) => {
   const page = await context.newPage();
 
   try {
-    await page.goto('https://www.trustpilot.com/users/login', { waitUntil: 'domcontentloaded' });
+    await page.goto('https://www.trustpilot.com/users/connect?redirect=%2f&source_cta=header', { waitUntil: 'domcontentloaded' });
 
     const frame = await page.frame(({ url }) => url.includes('authentication.trustpilot.com'));
     if (!frame) throw new Error('Login iframe not found');
