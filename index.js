@@ -13,12 +13,20 @@ app.post('/trigger-login', async (req, res) => {
   const page = await context.newPage();
 
   try {
-    await page.goto('https://www.trustpilot.com/users/login');
-    await page.fill('input[name="email"]', email);
-    await page.click('button[type="submit"]');
+    await page.goto('https://www.trustpilot.com/users/login', { waitUntil: 'domcontentloaded' });
+
+    // Wait for iframe to load
+    const frame = await page.frame(({ url }) => url.includes('authentication.trustpilot.com'));
+    if (!frame) throw new Error('Login iframe not found');
+
+    // Interact inside the iframe
+    await frame.fill('input[name="email"]', email);
+    await frame.click('button[type="submit"]');
     await page.waitForTimeout(3000);
+
     await browser.close();
     res.json({ status: 'OTP sent to email' });
+
   } catch (err) {
     await browser.close();
     res.status(500).json({ error: err.message });
@@ -32,15 +40,22 @@ app.post('/submit-otp', async (req, res) => {
   const page = await context.newPage();
 
   try {
-    await page.goto('https://www.trustpilot.com/users/login');
-    await page.fill('input[name="email"]', email);
-    await page.click('button[type="submit"]');
-    await page.waitForSelector('input[name="code"]', { timeout: 5000 });
-    await page.fill('input[name="code"]', otp);
-    await page.click('button[type="submit"]');
+    await page.goto('https://www.trustpilot.com/users/login', { waitUntil: 'domcontentloaded' });
+
+    const frame = await page.frame(({ url }) => url.includes('authentication.trustpilot.com'));
+    if (!frame) throw new Error('Login iframe not found');
+
+    await frame.fill('input[name="email"]', email);
+    await frame.click('button[type="submit"]');
+
+    await frame.waitForSelector('input[name="code"]', { timeout: 10000 });
+    await frame.fill('input[name="code"]', otp);
+    await frame.click('button[type="submit"]');
+
     await page.waitForTimeout(3000);
     await browser.close();
     res.json({ status: 'Logged in successfully' });
+
   } catch (err) {
     await browser.close();
     res.status(500).json({ error: err.message });
@@ -62,6 +77,7 @@ app.post('/post-review', async (req, res) => {
     await page.waitForTimeout(2000);
     await browser.close();
     res.json({ status: 'Review posted' });
+
   } catch (err) {
     await browser.close();
     res.status(500).json({ error: err.message });
