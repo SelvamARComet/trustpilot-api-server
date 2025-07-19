@@ -10,4 +10,9 @@
     "playwright": "^1.43.1",
     "cors": "^2.8.5"
   }
+  "dependencies": {
+  "express": "^4.18.2",
+  "cors": "^2.8.5",
+  "playwright": "^1.44.0"
+}
 }
