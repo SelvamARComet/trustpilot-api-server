@@ -23,6 +23,28 @@ app.post('/trigger-login', async (req, res) => {
   }
 });
 
+app.post('/api/verify-otp', async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
+    const page = await browser.newPage();
+
+    await page.goto('https://www.trustpilot.com/users/verify');
+    await page.type('input[name="email"]', email);
+    await page.type('input[name="otp"]', otp);
+    await page.click('button[type="submit"]');
+    await page.waitForTimeout(3000); // Adjust wait time as needed
+
+    await browser.close();
+
+    res.json({ status: 'OTP verified successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post('/submit-otp', async (req, res) => {
   const { email, otp } = req.body;
   const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
